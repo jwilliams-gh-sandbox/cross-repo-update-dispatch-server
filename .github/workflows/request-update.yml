@@ -29,12 +29,12 @@ jobs:
       
       - name: create pr
         run: |
-          BRANCH="update-version-${{ inputs.version_number }}"
+          BRANCH="update-version-${{ inputs.version }}"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b $BRANCH
-          git commit -am "update version to ${{ inputs.version_number }}"
+          git commit -am "update version to ${{ inputs.version }}"
           git push origin $BRANCH
-          gh pr create --title "update version to ${{ inputs.version_number }}" --body "client-dispatched version bump" --head $BRANCH
+          gh pr create --title "update version to ${{ inputs.version }}" --body "client-dispatched version bump" --head $BRANCH
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
