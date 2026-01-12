@@ -1,0 +1,40 @@
+name: Request Update
+
+on:
+  repository_dispatch:
+    inputs:
+      version:
+        description: 'Value to update'
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Value to update'
+        required: true
+        
+  
+jobs:
+  update-config:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: modify config
+        run: |
+          VERSION=${{ inputs.version }}
+          sed -i "s|\"version\": \"[^\"]*\"|\"version\": \"$VERSION\"|g" config.json
+      
+      - name: create pr
+        run: |
+          BRANCH="update-version-${{ inputs.version_number }}"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b $BRANCH
+          git commit -am "update version to ${{ inputs.version_number }}"
+          git push origin $BRANCH
+          gh pr create --title "update version to ${{ inputs.version_number }}" --body "client-dispatched version bump" --head $BRANCH
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
