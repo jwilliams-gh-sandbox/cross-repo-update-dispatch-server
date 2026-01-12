@@ -1,11 +1,8 @@
-name: Request Update
+name: Perform Update
 
 on:
   repository_dispatch:
-    inputs:
-      version:
-        description: 'Value to update'
-        required: true
+    types: [perform-update]
   workflow_dispatch:
     inputs:
       version:
@@ -21,11 +18,20 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v6
+
+      - name: determine version
+        run: |
+          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            VERSION="${{ github.event.client_payload.version }}"
+          else
+            VERSION="${{ inputs.version }}"
+          fi
+          
+          echo "VERSION_INPUT=$VERSION" >> $GITHUB_ENV
       
       - name: modify config
         run: |
-          VERSION=${{ inputs.version }}
-          sed -i "s|\"version\": \"[^\"]*\"|\"version\": \"$VERSION\"|g" config.json
+          sed -i "s|\"version\": \"[^\"]*\"|\"version\": \"$VERSION_INPUT\"|g" config.json
       
       - name: create pr
         run: |
